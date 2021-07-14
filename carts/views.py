@@ -15,13 +15,13 @@ from products.models import Variation
 
 
 class CartAPIView(generics.ListAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
 
-
-class CartDetailAPIView(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
     serializer_class = CartSerializer
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        cart = Cart.objects.get(user=user)
+        serializer = self.serializer_class(cart)
+        return Response(serializer.data)
 
 
 class AddProductToCartAPI(APIView):
@@ -29,10 +29,7 @@ class AddProductToCartAPI(APIView):
 
     def post(self, request, format=None):
         data = request.data
-
-        user_email = data.get("user")
-        
-        user = NewUser.objects.get(email=user_email)
+        user = request.user
         
         cart = Cart.objects.get(user=user)
 
@@ -68,9 +65,7 @@ class CheckoutAPIView(APIView):
     serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
-        data = request.data
-        email = data.get("user")
-        user = NewUser.objects.get(email=email)
+        user = request.user
         cart_id = Cart.objects.get(user=user)
         all_items = CartItem.objects.filter(cart=cart_id)
  
@@ -107,7 +102,7 @@ class CheckoutAPIView(APIView):
         )
         order_data = {
             "order_id": order.id,
-            "user": email,
+            "user": user.email,
             "total_order_price": order.total_order_price,
             "total_order_price_with_discount":order.total_order_price_with_discount
         }

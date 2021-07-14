@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
+    TokenVerifyView,
 )
 from products.views import (
     APIHomeView,
@@ -14,7 +15,6 @@ from products.views import (
 )
 from carts.views import (
     CartAPIView,
-    CartDetailAPIView,
     AddProductToCartAPI,
     CheckoutAPIView,
 )
@@ -41,12 +41,11 @@ urlpatterns = [
          name="login_api"),
     path("api/token/refresh/", TokenRefreshView.as_view(),
          name="token_refresh"),
-    path("api/carts/", CartAPIView.as_view(),
+    path("api/token/verify/", TokenVerifyView.as_view()),
+    path("api/cart/", CartAPIView.as_view(),
          name="carts_api"),
-    path("api/carts/add_product/", AddProductToCartAPI.as_view(),
+    path("api/cart/add_product/", AddProductToCartAPI.as_view(),
          name="add_to_cart_api"),
-    path("api/carts/<int:pk>", CartDetailAPIView.as_view(),
-         name="cart_api_detail"),
     path("api/orders/", OrderListAPI.as_view(),
          name="orders_api"),
     path("api/orders/<int:pk>", OrderDetailAPI.as_view(),

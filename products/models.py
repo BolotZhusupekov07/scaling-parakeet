@@ -59,7 +59,7 @@ class Comment(models.Model):
 
 
 class Reply(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, 
                                on_delete=models.CASCADE)
     content = models.TextField()

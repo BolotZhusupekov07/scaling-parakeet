@@ -1,16 +1,20 @@
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .models import Comment, Product, Variation
 from .serializer import (ProductSerializer,
                          CommentSerializer,
                          VariationSerializer)
+from .permissions import IsSupplier, IsSupplierOrReadOnly, IsAuthorOrReadOnly
 from carts.models import Cart
 from orders.models import Order
 
 
 class APIHomeView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, format=None):
         data = {
             "authentication": {
@@ -30,7 +34,7 @@ class APIHomeView(APIView):
                 "count": Comment.objects.all().count(),
                 "url": reverse("comments_api", request=request),
             },
-            "carts": {
+            "cart": {
                 "count": Cart.objects.all().count(),
                 "url": reverse("carts_api", request=request),
                 "Here you add the product to your cart":reverse("add_to_cart_api",
@@ -41,7 +45,7 @@ class APIHomeView(APIView):
                 "url": reverse("orders_api", request=request),
             },
             "checkout":{
-                "message":"Here you can make a purchase",
+                "message":"Here you make a purchase, be careful as soon as you do request, you make an order and your cart gets emptied",
                 "url": reverse("checkout_api", request=request)
             }
         }
@@ -49,11 +53,13 @@ class APIHomeView(APIView):
 
 
 class ProductList(generics.ListCreateAPIView):
+    permission_classes = [AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsSupplierOrReadOnly]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -64,14 +70,17 @@ class CommentList(generics.ListCreateAPIView):
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthorOrReadOnly]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-class VariationList(generics.ListCreateAPIView):
+class VariationList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Variation.objects.all()
     serializer_class = VariationSerializer
 
 
 class VariationDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsSupplier]
     queryset = Variation.objects.all()
     serializer_class = VariationSerializer

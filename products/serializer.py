@@ -1,3 +1,4 @@
+from django.db import models
 from rest_framework import serializers
 
 from .models import (
@@ -15,23 +16,19 @@ class ReplySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     replies = ReplySerializer(many=True, source='reply_set')
+
     class Meta:
         model = Comment
-        fields = ["id", "author", "rate", "content", "replies"]
+        fields = ["id", "product","author", "rate", "content","creation_date", "replies"]
 
     def create(self, validated_data):
         replies_data = validated_data.pop("reply_set")
-        Comment.objects.create(**validated_data)
+        comment = Comment.objects.create(**validated_data)
 
         for reply in replies_data:
-            Reply.objects.create(
-                comment=reply['comment'],
-                author=reply["author"],
-                content=reply["content"],
-                rate=reply["rate"],
-            )
+            Reply.objects.create(comment=comment, **reply)
         
-
+        return comment
     def update(self, instance, validated_data):
         replies_data = validated_data.pop("reply_set")
         replies = (instance.reply_set).all()
@@ -92,15 +89,18 @@ class ProductSerializer(serializers.ModelSerializer):
             Pictures.objects.create(product=product, **image)
 
         for comment in comments_data:
-            Comment.objects.create(
+            replies_data = comment.pop('reply_set')
+            comment = Comment.objects.create(
                 product=product,
                 author=comment["author"],
                 rate=comment["rate"],
                 content=comment["content"],
             )
+            for reply in replies_data:
+                Reply.objects.create(comment=comment, **reply)
 
         Variation.objects.create(
-            product=product, title=product.title, price=product.price, 
+            product=product, title=product.title, price=product.price, discount=product.discount
         )
         return product
 
@@ -124,6 +124,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
         Variation.objects.create(
             product=instance, title=instance.title, price=instance.price, 
+            discount=instance.discount
         )
 
         for comment_data in comments_data:
