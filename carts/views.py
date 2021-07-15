@@ -62,7 +62,6 @@ class AddProductToCartAPI(APIView):
 
 
 class CheckoutAPIView(APIView):
-    serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
         user = request.user

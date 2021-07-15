@@ -65,9 +65,6 @@ class CartSerializer(serializers.ModelSerializer):
 
         return total_price
 
-class CheckoutSerializer(serializers.Serializer):
-    user = serializers.ChoiceField(choices=NewUser.objects.all())
-
 
 class AddProductToCartSerializer(serializers.Serializer):
     product = serializers.ChoiceField(choices=Variation.objects.all())
