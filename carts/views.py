@@ -5,8 +5,7 @@ from decimal import Decimal
 
 from .models import Cart, CartCheckout, CartItem, CartItemCheckout
 from .serializer import (
-    CartSerializer,
-    AddProductToCartSerializer,
+    CartSerializer
 )
 from orders.models import Order
 from products.models import Variation
@@ -23,7 +22,7 @@ class CartAPIView(generics.ListAPIView):
 
 
 class AddProductToCartAPI(APIView):
-    serializer_class = AddProductToCartSerializer
+
 
     def post(self, request, format=None):
         data = request.data
