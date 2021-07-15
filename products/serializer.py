@@ -1,5 +1,4 @@
-from users.models import NewUser
-from django.db import models
+
 from rest_framework import serializers
 
 from .models import (
@@ -81,7 +80,7 @@ class ProductSerializer(serializers.ModelSerializer):
     supplier = UserSerializer(read_only=True)
     category = CategorySerializer()
 
-    
+
     class Meta:
         model = Product
         fields = [

@@ -9,7 +9,6 @@ from .serializer import (
     AddProductToCartSerializer,
 )
 from orders.models import Order
-from users.models import NewUser
 from products.models import Variation
 
 

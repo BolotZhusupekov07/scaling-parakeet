@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderSerializer
-from users.models import NewUser
+
 
 class OrderListAPI(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
