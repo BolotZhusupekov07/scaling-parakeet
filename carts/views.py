@@ -6,7 +6,6 @@ from decimal import Decimal
 from .models import Cart, CartCheckout, CartItem, CartItemCheckout
 from .serializer import (
     CartSerializer,
-    CheckoutSerializer,
     AddProductToCartSerializer,
 )
 from orders.models import Order
