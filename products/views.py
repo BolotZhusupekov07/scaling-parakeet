@@ -1,26 +1,27 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
-from .models import Comment, Product, Variation
+from .models import Comment, Product, Reply, Variation
 from .serializer import (ProductSerializer,
                          CommentSerializer,
-                         VariationSerializer)
+                         VariationSerializer,
+                         ReplySerializer)
 from .permissions import IsSupplier, IsSupplierOrReadOnly, IsAuthorOrReadOnly
 from carts.models import Cart
 from orders.models import Order
 
 
 class APIHomeView(APIView):
-    permission_classes = [AllowAny]
     def get(self, request, format=None):
         data = {
             "authentication": {
                 "register": reverse("register_api", request=request),
                 "login": reverse("login_api", request=request),
-                "token_refresh":reverse("token_refresh", request=request)
+                "token_refresh":reverse("token_refresh", request=request),
+                "profile":reverse('user_profile', request=request)
             },
             "products": {
                 "count": Product.objects.all().count(),
@@ -33,6 +34,10 @@ class APIHomeView(APIView):
             "comments": {
                 "count": Comment.objects.all().count(),
                 "url": reverse("comments_api", request=request),
+            },
+            "comment-replies": {
+                "count": Reply.objects.all().count(),
+                "url": reverse("replies_api", request=request),
             },
             "cart": {
                 "count": Cart.objects.all().count(),
@@ -53,29 +58,45 @@ class APIHomeView(APIView):
 
 
 class ProductList(generics.ListCreateAPIView):
-    permission_classes = [AllowAny]
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    def get(self, request, format=None):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsSupplierOrReadOnly]
+    permission_classes = [IsAuthenticated, IsSupplierOrReadOnly]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
 class CommentList(generics.ListCreateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
+    def get(self, request, format=None):
+        comments = Comment.objects.all()
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
 class VariationList(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
     queryset = Variation.objects.all()
     serializer_class = VariationSerializer
 
@@ -84,3 +105,21 @@ class VariationDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsSupplier]
     queryset = Variation.objects.all()
     serializer_class = VariationSerializer
+
+class RepliesList(generics.ListCreateAPIView):
+    def get(self, request, format=None):
+        replies = Reply.objects.all()
+        serializer = ReplySerializer(replies, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = ReplySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReplyDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer

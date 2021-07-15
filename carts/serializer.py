@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import CartItem, Cart, CartItemCheckout, CartCheckout
 from decimal import Decimal
 from products.serializer import VariationSerializer
 from users.models import NewUser
 from products.models import Variation
+from users.serializers import UserSerializer
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -36,10 +38,11 @@ class CartSerializer(serializers.ModelSerializer):
     products = CartItemSerializer(many=True,
                                   read_only=True,
                                   source="cartitem_set")
+  
 
     class Meta:
         model = Cart
-        fields = ["id", "user", "products", "total_price", "total_price_with_discount"]
+        fields = ["products", "total_price", "total_price_with_discount"]
 
     def get_total_price(self, obj):
 
@@ -67,7 +70,6 @@ class CheckoutSerializer(serializers.Serializer):
 
 
 class AddProductToCartSerializer(serializers.Serializer):
-    user = serializers.ChoiceField(choices=NewUser.objects.all())
     product = serializers.ChoiceField(choices=Variation.objects.all())
     quantity = serializers.IntegerField()
 

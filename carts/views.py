@@ -101,8 +101,6 @@ class CheckoutAPIView(APIView):
             total_order_price_with_discount=total_price_with_discount
         )
         order_data = {
-            "order_id": order.id,
-            "user": user.email,
             "total_order_price": order.total_order_price,
             "total_order_price_with_discount":order.total_order_price_with_discount
         }

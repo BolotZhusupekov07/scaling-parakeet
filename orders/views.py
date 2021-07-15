@@ -8,7 +8,7 @@ from .serializers import OrderSerializer
 from users.models import NewUser
 
 class OrderListAPI(generics.ListAPIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
     def get(self, request, *args, **kwargs):

@@ -1,57 +1,72 @@
+from users.models import NewUser
 from django.db import models
 from rest_framework import serializers
 
 from .models import (
+        Category,
         Product,
         Comment,
         Pictures,
         Reply,
         Variation
 )
+from users.serializers import UserSerializer
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name']
+
 
 class ReplySerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
     class Meta:
         model = Reply
         fields = ['comment','author', 'content', 'rate', 'creation_date']
 
-class CommentSerializer(serializers.ModelSerializer):
-    replies = ReplySerializer(many=True, source='reply_set')
+    def create(self, validate_data):
+        author = validate_data.pop('author')
+        reply = Reply.objects.create(author=author,**validate_data)
+        return reply
 
-    class Meta:
-        model = Comment
-        fields = ["id", "product","author", "rate", "content","creation_date", "replies"]
-
-    def create(self, validated_data):
-        replies_data = validated_data.pop("reply_set")
-        comment = Comment.objects.create(**validated_data)
-
-        for reply in replies_data:
-            Reply.objects.create(comment=comment, **reply)
-        
-        return comment
     def update(self, instance, validated_data):
-        replies_data = validated_data.pop("reply_set")
-        replies = (instance.reply_set).all()
-        replies = list(replies)
 
-        instance.author = validated_data.get("author", instance.author)
         instance.rate = validated_data.get("rate", instance.rate)
         instance.content = validated_data.get("content", instance.content)
         instance.save()
 
-        for reply_data in replies_data:
-            reply = replies.pop(0)
-            reply.author = reply_data.get("author", reply.author)
-            reply.rate = reply_data.get("rate", reply.rate)
-            reply.content = reply_data.get("content", reply.content)
-            reply.save()
+        return instance
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    replies = ReplySerializer(many=True, source='reply_set', read_only=True)
+    author = UserSerializer(read_only=True)
+
+
+    class Meta:
+        model = Comment
+        fields = ["id","product","author", "rate", "content","creation_date", "replies"]
+
+    def create(self, validated_data):
+
+        author = validated_data.pop('author')
+        comment = Comment.objects.create(author=author, **validated_data)        
+        return comment
+
+    def update(self, instance, validated_data):
+
+        instance.rate = validated_data.get("rate", instance.rate)
+        instance.content = validated_data.get("content", instance.content)
+        instance.save()
+
         return instance
 
 
 class PictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pictures
-        fields = ["id", "image_url"]
+        fields = ["image_url"]
 
 
 class VariationSerializer(serializers.ModelSerializer):
@@ -62,8 +77,11 @@ class VariationSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True, source="pictures_set")
-    comments = CommentSerializer(many=True, source="comment_set")
+    comments = CommentSerializer(many=True, source="comment_set", read_only=True)
+    supplier = UserSerializer(read_only=True)
+    category = CategorySerializer()
 
+    
     class Meta:
         model = Product
         fields = [
@@ -80,24 +98,14 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        comments_data = validated_data.pop("comment_set")
+        user = validated_data.pop('user')
         images_data = validated_data.pop("pictures_set")
-
-        product = Product.objects.create(**validated_data)
+        category = validated_data.pop('category')
+        category = Category.objects.get(name=category['name'])
+        product = Product.objects.create(supplier=user, category=category,**validated_data)
 
         for image in images_data:
             Pictures.objects.create(product=product, **image)
-
-        for comment in comments_data:
-            replies_data = comment.pop('reply_set')
-            comment = Comment.objects.create(
-                product=product,
-                author=comment["author"],
-                rate=comment["rate"],
-                content=comment["content"],
-            )
-            for reply in replies_data:
-                Reply.objects.create(comment=comment, **reply)
 
         Variation.objects.create(
             product=product, title=product.title, price=product.price, discount=product.discount
@@ -105,9 +113,6 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
     def update(self, instance, validated_data):
-        comments_data = validated_data.pop("comment_set")
-        comments = (instance.comment_set).all()
-        comments = list(comments)
 
         pictures_data = validated_data.pop("pictures_set")
         pictures = (instance.pictures_set).all()
@@ -127,12 +132,6 @@ class ProductSerializer(serializers.ModelSerializer):
             discount=instance.discount
         )
 
-        for comment_data in comments_data:
-            comment = comments.pop(0)
-            comment.author = comment_data.get("author", comment.author)
-            comment.rate = comment_data.get("rate", comment.rate)
-            comment.content = comment_data.get("content", comment.content)
-            comment.save()
 
         for picture_data in pictures_data:
             picture = pictures.pop(0)

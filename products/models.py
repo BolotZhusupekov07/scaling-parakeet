@@ -10,7 +10,8 @@ rates = ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
 class Category(models.Model):
     name = models.CharField(max_length=250, db_index=True)
 
-
+    def __str__(self) -> str:
+        return self.name
 class Product(models.Model):
     title = models.CharField(max_length=250)
     description = models.TextField()

@@ -11,7 +11,9 @@ from products.views import (
     CommentList,
     CommentDetail,
     VariationList,
-    VariationDetail
+    VariationDetail,
+    RepliesList,
+    ReplyDetail
 )
 from carts.views import (
     CartAPIView,
@@ -23,6 +25,7 @@ from users.views import (
     RegisterView,
     VerifyEmailView,
     LoginView,
+    UserRetrieveUpdateAPIView
 )
 from orders.views import (
     OrderListAPI,
@@ -42,6 +45,8 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(),
          name="token_refresh"),
     path("api/token/verify/", TokenVerifyView.as_view()),
+    path("api/user/profile/", UserRetrieveUpdateAPIView.as_view(),
+          name='user_profile'),
     path("api/cart/", CartAPIView.as_view(),
          name="carts_api"),
     path("api/cart/add_product/", AddProductToCartAPI.as_view(),
@@ -63,6 +68,10 @@ urlpatterns = [
         CommentDetail.as_view(),
         name="comment_api_detail",
     ),
+    path("api/products/comments/replies/", RepliesList.as_view(),
+         name="replies_api"),
+    path("api/products/comments/replies/<int:pk>", ReplyDetail.as_view(),
+         name="reply_detail_api"),
     path("api/products/variations/", VariationList.as_view(),
          name="variations_api"),
     path(
