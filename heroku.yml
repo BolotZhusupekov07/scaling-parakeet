@@ -7,7 +7,6 @@ build:
 release:
   image: web
   command:
-    - ls
     - python manage.py collectstatic --noinput
 run:
   web: gunicorn core.wsgi
