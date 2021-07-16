@@ -179,8 +179,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 AUTHENTICATION_BACKENDS = (("django.contrib.auth.backends.ModelBackend"),)
-
+django_heroku.settings(locals())
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
-
-django_heroku.settings(locals())
