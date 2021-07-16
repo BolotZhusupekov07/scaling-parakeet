@@ -3,12 +3,11 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import dj_database_url
-import django_heroku
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = '4njs%1h48!_8ulqf(8dzpd@vo*ky0028&t1p6$kcuokn_0-poz'
+SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = True
 
@@ -180,7 +179,7 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 AUTHENTICATION_BACKENDS = (("django.contrib.auth.backends.ModelBackend"),)
-django_heroku.settings(locals())
 
-db_from_env = dj_database_url.config(conn_max_age=500)
+db_from_env = dj_database_url.config()
 DATABASES['default'].update(db_from_env)
+DATABASES['default']['CONN_MAX_AGE'] = 500
