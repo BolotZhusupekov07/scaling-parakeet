@@ -11,7 +11,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vast-castle-76671.herokuapp.com']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -65,7 +65,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": 'ecommerce',
+        "NAME": config('DB_NAME'),
         "USER": config('DB_USER'),
         "HOST": config('DB_HOST'),
         "PASSWORD": config('DB_PASSWORD'),

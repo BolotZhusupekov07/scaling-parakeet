@@ -8,7 +8,11 @@ services:
       - 8000:8000
     image: app:django
     container_name: django_container1
-    command: python manage.py runserver 0.0.0.0:8000
+    command:  >
+      sh -c "
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
     depends_on:
         - db
   db:
