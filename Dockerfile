@@ -8,8 +8,3 @@ RUN pip3 install -r requirements.txt
 COPY . .
 RUN python manage.py collectstatic --noinput
 
-RUN adduser -D myuser
-USER myuser
-
-# run gunicorn
-CMD gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
