@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import dj_database_url
+import django_heroku
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,7 +68,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "eshop",
         "USER": "postgres",
-        "HOST": "127.0.0.1",
+        "HOST": "db",
         "PASSWORD": "kirgizia",
         "PORT": "5432"
 
@@ -181,3 +182,5 @@ AUTHENTICATION_BACKENDS = (("django.contrib.auth.backends.ModelBackend"),)
 
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
+
+django_heroku.settings(locals())
