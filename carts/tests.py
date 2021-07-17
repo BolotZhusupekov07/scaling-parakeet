@@ -53,7 +53,6 @@ class CartViews(TestCase):
     def test_checkout(self):
                         
         request = factory.post('/api/carts/checkout/',
-                                {"user":"supplier@gmail.com"},
                                 format='json')
         response = CheckoutAPIView.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

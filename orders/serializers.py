@@ -1,6 +1,6 @@
 from django.db.models import fields
 from rest_framework import serializers
-from .models import Order
+from .models import Order, Promocode
 from carts.serializer import CartCheckoutSerializer
 
 
@@ -15,3 +15,9 @@ class OrderSerializer(serializers.ModelSerializer):
                  "created_at",
                  "total_order_price",
                  "total_order_price_with_discount"]
+
+
+class PromocodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Promocode
+        fields = ['name', 'discount']

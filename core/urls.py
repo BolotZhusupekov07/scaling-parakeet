@@ -13,7 +13,8 @@ from products.views import (
     VariationList,
     VariationDetail,
     RepliesList,
-    ReplyDetail
+    ReplyDetail,
+    CategoryListCreate
 )
 from carts.views import (
     CartAPIView,
@@ -29,7 +30,9 @@ from users.views import (
 )
 from orders.views import (
     OrderListAPI,
-    OrderDetailAPI
+    OrderDetailAPI,
+    GetPriceWithPromocode,
+    PromocodoApi
 ) 
 
 urlpatterns = [
@@ -57,6 +60,8 @@ urlpatterns = [
          name="order_detail_api"),
     path("api/checkout/", CheckoutAPIView.as_view(),
          name="checkout_api"),
+    path("api/checkout/<str:promocode>/", GetPriceWithPromocode.as_view(),
+         name="checkout_promocode_api"),
     path("api/products/", ProductList.as_view(),
          name="products_api"),
     path("api/products/<int:pk>", ProductDetail.as_view(),
@@ -78,5 +83,15 @@ urlpatterns = [
         "api/products/variations/<int:pk>",
         VariationDetail.as_view(),
         name="variation_api_detail",
+    ),
+    path(
+        "api/products/categories/",
+         CategoryListCreate.as_view(),
+        name="category_list_api",
+    ),
+    path(
+        "api/promocodes/",
+         PromocodoApi().as_view(),
+        name="promocode_api",
     )
 ]
