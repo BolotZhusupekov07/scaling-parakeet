@@ -12,7 +12,7 @@ from .serializers import (
     UserRegistrationSerializer,
     EmailVerificationSerializer,
     LoginSerializer,
-    UserSerializer
+    UserSerializer,
 )
 from .models import NewUser
 from .utils import Util
@@ -36,9 +36,7 @@ class RegisterView(generics.GenericAPIView):
         current_site = request.get_host()
         link = reverse("email_verify")
         url = "http://" + current_site + link + "?token=" + str(token)
-        body = (
-            "Hi " + " Use the link below to verify your email \n" + url
-        )
+        body = "Hi " + " Use the link below to verify your email \n" + url
         data = {
             "email_body": body,
             "to_email": user.email,
@@ -62,13 +60,11 @@ class VerifyEmailView(APIView):
                 user.is_verified = True
                 user.save()
                 return Response(
-                    {"email": "Successfully activated"},
-                    status=status.HTTP_200_OK
+                    {"email": "Successfully activated"}, status=status.HTTP_200_OK
                 )
         except jwt.ExpiredSignatureError:
             return Response(
-                {"error": "Activation Expired"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Activation Expired"}, status=status.HTTP_400_BAD_REQUEST
             )
         except jwt.exceptions.DecodeError:
             return Response(
@@ -79,10 +75,12 @@ class VerifyEmailView(APIView):
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -90,19 +88,11 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         serializer = self.serializer_class(request.user)
-        data = serializer.data
-        if data['role']==1:
-
-            data['role'] = "Supplier"
-        else:
-            data['role'] = "Client"
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         serializer_data = request.data
-        serializer = self.serializer_class(
-            request.user, data=serializer_data, partial=True
-        )
+        serializer = self.serializer_class(data=serializer_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

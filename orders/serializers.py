@@ -9,15 +9,17 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id",
-                  "user",
-                 "cart",
-                 "created_at",
-                 "total_order_price",
-                 "total_order_price_with_discount"]
+        fields = [
+            "id",
+            "user",
+            "cart",
+            "created_at",
+            "total_order_price",
+            "total_order_price_with_discount",
+        ]
 
 
 class PromocodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promocode
-        fields = ['name', 'discount']
+        fields = ["name", "discount"]

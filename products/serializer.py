@@ -1,32 +1,25 @@
-
 from rest_framework import serializers
 
-from .models import (
-        Category,
-        Product,
-        Comment,
-        Pictures,
-        Reply,
-        Variation
-)
+from .models import Category, Product, Comment, Pictures, Reply, Variation
 from users.serializers import UserSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = ["name"]
 
 
 class ReplySerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
+
     class Meta:
         model = Reply
-        fields = ['comment','author', 'content', 'rate', 'creation_date']
+        fields = ["comment", "author", "content", "rate", "creation_date"]
 
     def create(self, validate_data):
-        author = validate_data.pop('author')
-        reply = Reply.objects.create(author=author,**validate_data)
+        author = validate_data.pop("author")
+        reply = Reply.objects.create(author=author, **validate_data)
         return reply
 
     def update(self, instance, validated_data):
@@ -39,18 +32,25 @@ class ReplySerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    replies = ReplySerializer(many=True, source='reply_set', read_only=True)
+    replies = ReplySerializer(many=True, source="reply_set", read_only=True)
     author = UserSerializer(read_only=True)
-
 
     class Meta:
         model = Comment
-        fields = ["id","product","author", "rate", "content","creation_date", "replies"]
+        fields = [
+            "id",
+            "product",
+            "author",
+            "rate",
+            "content",
+            "creation_date",
+            "replies",
+        ]
 
     def create(self, validated_data):
 
-        author = validated_data.pop('author')
-        comment = Comment.objects.create(author=author, **validated_data)        
+        author = validated_data.pop("author")
+        comment = Comment.objects.create(author=author, **validated_data)
         return comment
 
     def update(self, instance, validated_data):
@@ -72,14 +72,13 @@ class VariationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variation
         fields = ["id", "title", "price", "discount", "creation_date"]
-  
+
 
 class ProductSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True, source="pictures_set")
     comments = CommentSerializer(many=True, source="comment_set", read_only=True)
     supplier = UserSerializer(read_only=True)
     category = CategorySerializer()
-
 
     class Meta:
         model = Product
@@ -97,17 +96,22 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        user = validated_data.pop('user')
+        user = validated_data.pop("user")
         images_data = validated_data.pop("pictures_set")
-        category = validated_data.pop('category')
-        category = Category.objects.get(name=category['name'])
-        product = Product.objects.create(supplier=user, category=category,**validated_data)
+        category = validated_data.pop("category")
+        category = Category.objects.get(name=category["name"])
+        product = Product.objects.create(
+            supplier=user, category=category, **validated_data
+        )
 
         for image in images_data:
             Pictures.objects.create(product=product, **image)
 
         Variation.objects.create(
-            product=product, title=product.title, price=product.price, discount=product.discount
+            product=product,
+            title=product.title,
+            price=product.price,
+            discount=product.discount,
         )
         return product
 
@@ -118,8 +122,7 @@ class ProductSerializer(serializers.ModelSerializer):
         pictures = list(pictures)
 
         instance.title = validated_data.get("title", instance.title)
-        instance.description = validated_data.get("description",
-                                                  instance.description)
+        instance.description = validated_data.get("description", instance.description)
         instance.price = validated_data.get("price", instance.price)
         instance.discount = validated_data.get("discount", instance.discount)
         instance.supplier = validated_data.get("supplier", instance.supplier)
@@ -127,15 +130,15 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.save()
 
         Variation.objects.create(
-            product=instance, title=instance.title, price=instance.price, 
-            discount=instance.discount
+            product=instance,
+            title=instance.title,
+            price=instance.price,
+            discount=instance.discount,
         )
-
 
         for picture_data in pictures_data:
             picture = pictures.pop(0)
-            picture.image_url = picture_data.get("image_url",
-                                                 picture.image_url)
+            picture.image_url = picture_data.get("image_url", picture.image_url)
             picture.save()
 
         return instance

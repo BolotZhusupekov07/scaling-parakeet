@@ -9,34 +9,42 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('carts', '0001_initial'),
-        ('products', '0001_initial'),
+        ("carts", "0001_initial"),
+        ("products", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cartitemcheckout',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='products.variation'),
+            model_name="cartitemcheckout",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="products.variation"
+            ),
         ),
         migrations.AddField(
-            model_name='cartitem',
-            name='cart',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='carts.cart'),
+            model_name="cartitem",
+            name="cart",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="carts.cart"
+            ),
         ),
         migrations.AddField(
-            model_name='cartitem',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='products.variation'),
+            model_name="cartitem",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="products.variation"
+            ),
         ),
         migrations.AddField(
-            model_name='cartcheckout',
-            name='cart',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='carts.cart'),
+            model_name="cartcheckout",
+            name="cart",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="carts.cart"
+            ),
         ),
         migrations.AddField(
-            model_name='cartcheckout',
-            name='products',
-            field=models.ManyToManyField(to='carts.CartItemCheckout'),
+            model_name="cartcheckout",
+            name="products",
+            field=models.ManyToManyField(to="carts.CartItemCheckout"),
         ),
     ]

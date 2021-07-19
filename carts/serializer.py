@@ -4,7 +4,6 @@ from decimal import Decimal
 from products.serializer import VariationSerializer
 
 
-
 class CartItemSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
     total_price_with_discount = serializers.SerializerMethodField()
@@ -12,30 +11,33 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["cart", "product", "quantity", "total_price", "total_price_with_discount"]
+        fields = [
+            "cart",
+            "product",
+            "quantity",
+            "total_price",
+            "total_price_with_discount",
+        ]
 
     def get_total_price(self, obj):
-      
+
         total_price = Decimal(obj.product.price) * Decimal(obj.quantity)
         return total_price
-   
 
     def get_total_price_with_discount(self, obj):
 
         price = obj.product.price
         discount = obj.product.discount
-        price_after_discount = (Decimal(price) - Decimal((Decimal(price)*discount)/100))*obj.quantity
+        price_after_discount = (
+            Decimal(price) - Decimal((Decimal(price) * discount) / 100)
+        ) * obj.quantity
         return price_after_discount
-       
 
 
 class CartSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
     total_price_with_discount = serializers.SerializerMethodField()
-    products = CartItemSerializer(many=True,
-                                  read_only=True,
-                                  source="cartitem_set")
-  
+    products = CartItemSerializer(many=True, read_only=True, source="cartitem_set")
 
     class Meta:
         model = Cart
@@ -57,7 +59,9 @@ class CartSerializer(serializers.ModelSerializer):
         for item in cart_items:
             price = item.product.price
             discount = item.product.discount
-            price_after_discount = (Decimal(price) - Decimal((Decimal(price)*discount)/100))*item.quantity
+            price_after_discount = (
+                Decimal(price) - Decimal((Decimal(price) * discount) / 100)
+            ) * item.quantity
             total_price += price_after_discount
 
         return total_price

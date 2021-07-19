@@ -6,17 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0003_promocode'),
+        ("orders", "0003_promocode"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='promocode',
-            name='id',
+            model_name="promocode",
+            name="id",
         ),
         migrations.AlterField(
-            model_name='promocode',
-            name='name',
-            field=models.CharField(db_index=True, max_length=500, primary_key=True, serialize=False, unique=True),
+            model_name="promocode",
+            name="name",
+            field=models.CharField(
+                db_index=True,
+                max_length=500,
+                primary_key=True,
+                serialize=False,
+                unique=True,
+            ),
         ),
     ]

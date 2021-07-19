@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from decimal import Decimal
-from products.permissions import IsSupplierOrReadOnly
+from products.permissions import IsSupplier, IsOwner
 from .models import Order, Promocode
 from .serializers import OrderSerializer, PromocodeSerializer
 
@@ -21,10 +21,11 @@ class OrderListAPI(generics.ListAPIView):
         return Response(serializer.data)
 
 
-
 class OrderDetailAPI(generics.RetrieveAPIView):
 
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
+
     def get_object(self, pk):
         try:
             return Order.objects.get(pk=pk)
@@ -33,22 +34,21 @@ class OrderDetailAPI(generics.RetrieveAPIView):
 
     def get(self, request, pk, format=None):
         order = self.get_object(pk)
-        if order.user != request.user:
-            raise PermissionDenied("You cannnot view other people's orders")
         serializer = self.serializer_class(order)
         return Response(serializer.data)
 
+
 class PromocodoApi(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsSupplierOrReadOnly]
+    permission_classes = [IsAuthenticated, IsSupplier]
     queryset = Promocode.objects.all()
     serializer_class = PromocodeSerializer
 
-class GetPriceWithPromocode(APIView):
 
+class GetPriceWithPromocode(APIView):
     def get_object(self, promocode):
         try:
             return Promocode.objects.get(name=promocode)
-        except Order.DoesNotExist:
+        except Promocode.DoesNotExist:
             raise Http404
 
     def get(self, request, promocode, format=None):
@@ -57,12 +57,13 @@ class GetPriceWithPromocode(APIView):
         order = Order.objects.filter(user=user).last()
         price = order.total_order_price
         price_with_discount = order.total_order_price_with_discount
-        price_after_promocode = Decimal(price) - (Decimal(price)*promo.discount)/100
-        price_with_discount_after_promocode = \
-         Decimal(price_with_discount)-(Decimal(price_with_discount)*promo.discount)/100
+        price_after_promocode = Decimal(price) - (Decimal(price) * promo.discount) / 100
+        price_with_discount_after_promocode = (
+            Decimal(price_with_discount)
+            - (Decimal(price_with_discount) * promo.discount) / 100
+        )
         data = {
             "total_price_after_promocode": price_after_promocode,
-            "total_price_with_discount_after_promocode":price_with_discount_after_promocode
+            "total_price_with_discount_after_promocode": price_with_discount_after_promocode,
         }
         return Response(data)
-

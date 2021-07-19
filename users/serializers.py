@@ -10,13 +10,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     message = serializers.SerializerMethodField()
 
-
     class Meta:
         model = NewUser
-        fields = ["email", "role",'message', "password"]
+        fields = ["email", "role", "message", "password"]
 
     def get_message(self, obj):
-        return 'Verification message has been sent to your email, please verify your email'
+        return (
+            "Verification message has been sent to your email, please verify your email"
+        )
 
     def create(self, validated_data):
         return NewUser.objects.create_user(**validated_data)
@@ -40,13 +41,9 @@ class LoginSerializer(serializers.ModelSerializer):
         model = NewUser
         fields = ["email", "password", "tokens", "role"]
 
-
     def get_tokens(self, obj):
-        user = NewUser.objects.get(email=obj['email'])
-        return {
-            'refresh': user.tokens()['refresh'],
-            'access': user.tokens()['access']
-        }
+        user = NewUser.objects.get(email=obj["email"])
+        return {"refresh": user.tokens()["refresh"], "access": user.tokens()["access"]}
 
     def validate(self, attrs):
         email = attrs.get("email", "")
@@ -55,36 +52,30 @@ class LoginSerializer(serializers.ModelSerializer):
         user = auth.authenticate(email=email, password=password)
 
         if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+            raise AuthenticationFailed("Invalid credentials, try again")
         if not user.is_active:
-            raise AuthenticationFailed('Account disabled, contact admin')
+            raise AuthenticationFailed("Account disabled, contact admin")
         if not user.is_verified:
-            raise AuthenticationFailed('Email is not verified')
+            raise AuthenticationFailed("Email is not verified")
 
-        return {
-            "email": user.email,
-            "tokens": user.tokens,
-            "role": user.role}
+        return {"email": user.email, "tokens": user.tokens, "role": user.role}
+
 
 class UserSerializer(serializers.ModelSerializer):
-        password = serializers.CharField(
-                                         max_length=128,
-                                         min_length=8,
-                                         write_only=True
-                                        )
-        
-        class Meta:
-            model = NewUser
-            fields = ('email','role', 'password')
+    password = serializers.CharField(max_length=128, min_length=8, write_only=True)
 
-        def update(self, instance, validated_data):
-            password = validated_data.pop('password', None)
+    class Meta:
+        model = NewUser
+        fields = ("email", "role", "password")
 
-            for (key, value) in validated_data.items():
-                setattr(instance, key, value)
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
 
-            if password is not None:     
-                instance.set_password(password)
-            instance.save()
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
 
-            return instance
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+
+        return instance
