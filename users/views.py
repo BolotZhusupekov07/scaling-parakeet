@@ -92,7 +92,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         serializer_data = request.data
-        serializer = self.serializer_class(data=serializer_data, partial=True)
+        serializer = self.serializer_class(request.user,data=serializer_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
